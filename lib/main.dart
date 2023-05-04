@@ -1,108 +1,91 @@
 import 'package:flutter/material.dart';
-import 'package:rive/rive.dart';
+import 'package:rive_tutorials/play_pause.dart';
+import 'package:rive_tutorials/widgets/rive_flutter_examples/carousel.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() => runApp(
+      MaterialApp(
+        title: 'Rive Tutorials',
+        home: const RiveExampleApp(),
+        darkTheme: ThemeData.dark().copyWith(
+          scaffoldBackgroundColor: _backgroundColor,
+          appBarTheme: const AppBarTheme(backgroundColor: _appBarColor),
+          colorScheme:
+              ColorScheme.fromSwatch().copyWith(primary: _primaryColor),
+        ),
+        themeMode: ThemeMode.dark,
+      ),
+    );
+
+/// An example application demoing Rive.
+class RiveExampleApp extends StatefulWidget {
+  const RiveExampleApp({Key? key}) : super(key: key);
+
+  @override
+  State<RiveExampleApp> createState() => _RiveExampleAppState();
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class _RiveExampleAppState extends State<RiveExampleApp> {
+  // Example animations
+  final _pages = [
+    const _Page('Simple Animation - Asset', PlayPause()),
+  ];
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(
-        title: "home",
+    return Scaffold(
+      appBar: AppBar(title: const Text('Rive Examples')),
+      body: Center(
+        child: ListView.separated(
+          shrinkWrap: true,
+          itemBuilder: (context, index) => _NavButton(page: _pages[index]),
+          separatorBuilder: (context, index) => const SizedBox(height: 16),
+          itemCount: _pages.length,
+        ),
       ),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+/// Class used to organize demo pages.
+class _Page {
+  final String name;
+  final Widget page;
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  const _Page(this.name, this.page);
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  late RiveAnimationController _controller;
+/// Button to navigate to demo pages.
+class _NavButton extends StatelessWidget {
+  const _NavButton({required this.page});
 
-  isPlaying() => _controller.isActive;
-
-  void togglePlay() => setState(() {
-        _controller.isActive = !_controller.isActive;
-      });
-
-  void reset() {
-    setState(() {
-      _controller.isActive = true;
-      (_controller as SimpleAnimation).reset();
-
-      _controller.apply(
-          (_controller as SimpleAnimation).instance!.animation.context, 0);
-      _controller.isActive = true;
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = SimpleAnimation("animate");
-  }
+  final _Page page;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: Column(
-      children: [
-        Expanded(
-          flex: 2,
-          child: RiveAnimation.asset(
-            "assets/rive/table_animation.riv",
-            fit: BoxFit.cover,
-            controllers: [_controller],
+    return Center(
+      child: ElevatedButton(
+        child: SizedBox(
+          width: 250,
+          child: Center(
+            child: Text(
+              page.name,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
           ),
         ),
-        Expanded(
-          flex: 1,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              IconButton(
-                onPressed: togglePlay,
-                icon: Icon(
-                  isPlaying() ? Icons.pause : Icons.play_arrow,
-                  size: 32,
-                ),
-              ),
-              IconButton(
-                onPressed: reset,
-                icon: Icon(
-                  Icons.restore,
-                  size: 32,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    ));
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute<void>(
+              builder: (context) => page.page,
+            ),
+          );
+        },
+      ),
+    );
   }
 }
+
+const _appBarColor = Color(0xFF323232);
+const _backgroundColor = Color(0xFF1D1D1D);
+const _primaryColor = Color(0xFF57A5E0);
